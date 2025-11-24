@@ -1,0 +1,4 @@
+sourcetype="linuxsyslog" ("authentication failure" OR "user unknown")
+| rex "user=(?<user>\S+)"
+| stats count by user
+| sort -count
