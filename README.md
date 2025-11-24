@@ -1,92 +1,79 @@
-SSH Brute Force Analysis in Splunk
+# SSH Brute Force Analysis in Splunk
 
-This project shows how I used Splunk Enterprise to investigate SSH brute force activity on a Linux system. I took system authentication logs, uploaded them into Splunk, wrote SPL searches to pull out important details, and built a dashboard that highlights the attack patterns.
+This project shows how I used Splunk Enterprise to investigate SSH brute force activity on a Linux system. I uploaded Linux authentication logs, wrote SPL searches to extract important details, and built a dashboard that shows the attack patterns.
 
-Overview
+## Overview
 
-The goal of this project was to understand how brute force attempts show up in Linux logs and how to investigate them using Splunk. I focused on:
+The goal of this project was to understand how brute force attacks appear in Linux logs and how to analyze them using Splunk. I focused on:
 
-finding the IPs that generated the most failed logins
+- finding which IPs generated the most failed logins  
+- identifying the usernames attackers tried  
+- checking invalid or unknown user attempts  
+- tracking activity over time  
+- confirming if any logins were successful  
+- documenting everything in an incident style format  
 
-identifying which usernames attackers tried
+The logs showed automated attacks on the root account and several invalid usernames. No successful logins were found.
 
-tracking activity over time
-
-checking for successful logins
-
-documenting everything in an incident style format
-
-The data clearly showed automated attacks against root and several other usernames. No successful logins were found.
-
-Dashboard Panels
+## Dashboard Panels
 
 The dashboard includes:
 
-Top attacking IP addresses
+- top attacking IP addresses  
+- attempted usernames  
+- unknown or invalid user attempts  
+- SSH authentication failures over time  
+- successful login checks  
+- total failure counts  
+- invalid username attempts over time  
+- most attempted invalid usernames  
+- attacking IP activity over time  
+- message breakdown from the logs  
 
-Attempted usernames
+## SPL Queries Used
 
-Unknown or invalid user attempts
+### Top Attacking IPs
 
-SSH authentication failures over time
-
-Successful login checks
-
-Total failure counts
-
-Invalid username attempts over time
-
-Most attempted invalid usernames
-
-Activity by IP over time
-
-Message breakdown from the logs
-
-These panels give a full picture of what was happening on the system.
-
-SPL Queries Used
-Top Attacking IPs
 sourcetype="linuxsyslog" "authentication failure"
 | rex "rhost=(?<src_ip>\d+\.\d+\.\d+\.\d+)"
 | stats count as failures by src_ip
 | sort -failures
 
-Attempted Usernames
+### Attempted Usernames
+
 sourcetype="linuxsyslog" ("authentication failure" OR "user unknown")
 | rex "user=(?<user>\S+)"
 | stats count by user
 | sort -count
 
-Failures Over Time
+### Failures Over Time
+
 sourcetype="linuxsyslog" "authentication failure"
 | timechart span=30m count
 
-Findings
+## Findings
 
-Several external IPs attempted to brute force the system
+- multiple external IPs attempted to brute force the system  
+- most attempts targeted the root account  
+- attackers tried invalid usernames like guest and test  
+- over 300 attempts were from nonexistent users  
+- no successful logins appeared in the logs  
+- behavior matched typical automated scanning and password guessing  
 
-Most attempts targeted the root account
+## Tools Used
 
-Attackers also tried invalid usernames like guest and test
+- Splunk Enterprise  
+- SPL  
+- Linux authentication logs  
 
-Over 300 attempts came from nonexistent users
+## Incident Notes
 
-No successful logins appeared in the logs
+A full writeup is included in the incident report file. It explains the five W breakdown and recommended actions such as disabling root SSH login, using fail2ban, and restricting SSH access.
 
-The pattern matched common automated scanning and password guessing
+## What I Learned
 
-Tools Used
-
-Splunk Enterprise
-
-SPL searches
-
-Linux system authentication logs
-
-Incident Notes
-
-A full writeup is included in the incident report file. It breaks down what happened using the five W structure and lists recommendations like disabling root SSH login, enabling fail2ban, and limiting SSH access.
-
-What I Learned
-
-This project helped me get more comfortable with reading Linux logs, working with SPL, building dashboards, and recognizing brute force activity. It also helped me practice writing an incident style summary.
+- how to read and analyze Linux logs  
+- how to write useful SPL searches  
+- how to build SOC style dashboards  
+- how to recognize brute force attack patterns  
+- how to document incidents clearly  
