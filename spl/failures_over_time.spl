@@ -1,0 +1,2 @@
+sourcetype="linuxsyslog" "authentication failure"
+| timechart span=30m count
