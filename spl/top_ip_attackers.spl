@@ -1,0 +1,4 @@
+sourcetype="linuxsyslog" "authentication failure"
+| rex "rhost=(?<src_ip>\d+\.\d+\.\d+\.\d+)"
+| stats count as failures by src_ip
+| sort -failures
